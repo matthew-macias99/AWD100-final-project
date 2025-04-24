@@ -126,7 +126,7 @@ function App() {
 
   return (
     <div className='container'>
-      <h1 className='mt-4 text-center'>Welcome to Your Library!</h1>
+      <h1 className='mt-4 text-center'>Welcome 2 Your Library!</h1>
       <div className='row mt-4'>
         {allAlbums && allAlbums.map((album) =>
         (<div className='col-lg-2 mt-4' key={album.id}>
