@@ -1,11 +1,6 @@
 import React, {useState} from 'react';
 import { nanoid } from 'nanoid';
 
-
-
-
-
-
 function AddAlbum(props){
     // id, albumName, artistName, genre, releaseDate, albumCover
     const[albumName, setAlbumName] = useState("");
@@ -15,10 +10,9 @@ function AddAlbum(props){
     const[selectedFile, setSelectedFile] = useState(null);
 
 
-    const doWork = () => {
+    const conjureAlbum = () => {
         const newAlbum = {"id":nanoid(), "albumName":albumName, "artistName":artistName, "genre":genre, "releaseDate":releaseDate, "albumCover":URL.createObjectURL(selectedFile)};
         props.addAlbum(newAlbum);
-
 
         setAlbumName("");
         setArtistName("");
@@ -26,17 +20,12 @@ function AddAlbum(props){
         setReleaseDate("");
         setSelectedFile(null);
 
-
         document.getElementById('fileUpload').value = "";
     }
-
 
     const imageUpdate = (event) =>{
         setSelectedFile(event.target.files[0]);
     }
-
-
-
 
     return(
         <div className='row mt-4'>
@@ -61,7 +50,7 @@ function AddAlbum(props){
                 <input type='file' name='file' id='fileUpload' onChange={imageUpdate}/>
             </div>
             <div className='col-lg-4 mt-4'>{/* submit button */}
-                <button type='button' id='btnAdd' className='btn btn-success btn-md' onClick={doWork}>Add Album </button>
+                <button type='button' id='btnAdd' className='btn btn-success btn-md' onClick={conjureAlbum}>Add Album </button>
             </div>
         </div>
     );
