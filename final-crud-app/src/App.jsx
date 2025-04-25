@@ -1,3 +1,4 @@
+import './App.css/'
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { nanoid } from 'nanoid';
 import React, {useState, useEffect} from 'react';
@@ -5,7 +6,7 @@ import AddAlbum from './components/AddAlbum';
 import _ from 'lodash';
 import Albums from './components/albums';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
-import {faSearch} from '@fortawesome/free-solid-svg-icons';
+import {faSearch, faPlusCircle, faMoon, faSun} from '@fortawesome/free-solid-svg-icons';
 
 
 function App() {
@@ -15,14 +16,28 @@ function App() {
   const[searchResults, setSearchResults] = useState(null);
   const[keywords, setKeywords] = useState("");
   const[genre, setGenre] = useState("");
+  const[darkMode, setDarkMode] =useState(false);
 
   useEffect(() => {
-    saveAlbums(albums);
+    const storedAlbums = localStorage.getItem('albums');
+    const storedDarkMode = localStorage.getItem('darkMode');
+
+    if (storedAlbums){
+      const parsedAlbums = JSON.parse(storedAlbums);
+      saveAlbums(parsedAlbums);
+    } else {
+      saveAlbums(albums);
+    }
+
+    if (storedDarkMode){
+      setDarkMode(JSON.parse(storedDarkMode));
+    }
   }, []);
 
   const saveAlbums = (albums) => {
     setAllAlbums(albums);
     setSearchResults(albums);
+    localStorage.setItem('albums', JSON.stringify(albums));
   }
 
   const addAlbum = (newAlbum) => {
@@ -65,6 +80,19 @@ function App() {
   const editAlbum = (updatedAlbum) => {
     const editedAlbumsArray = allAlbums.map(album => album.id === updatedAlbum.id ? {...album, ...updatedAlbum} : album);
     saveAlbums(editedAlbumsArray);
+  }
+
+  const resetLibrary = () => {
+    localStorage.removeItem('albums');
+    saveAlbums(albums);
+  }
+
+  const toggleDarkMode = () => {
+    setDarkMode(prevMode => {
+      const newMode = !prevMode;
+      localStorage.setItem('darkMode', JSON.stringify(newMode));
+      return newMode;
+    })
   }
 
 
@@ -177,11 +205,67 @@ function App() {
 
 
   return (
+  <div className={darkMode ? 'dark-mode' : ''}>
     <div className='container'>
+
+      {/* navbar */}
+      <nav className='navbar navbar-expand-lg navbar-dark bg-dark sticky-top'>
+        <div className='container-fluid'>
+          <a className='navbar-brand' href='#'>
+            <img src='images/disk.png' alt="Logo" className="img-fluid mx-2" style={{ height: "40px", width: "auto" }} />
+            Your Music Library
+          </a>
+          <button className='navbar-toggler' type='button' data-bs-toggle='collapse' data-bs-target='navbarNav'>
+            <span className='navbar-toggler-icon'></span>
+          </button>
+          <div className='collapse navbar-collapse' id='navbarNav'>
+            <ul className='navbar-nav ms-auto'>
+              <li className='nav-item'>
+                <button className='btn nav-link' onClick={toggleDarkMode}><FontAwesomeIcon icon={darkMode ? faSun : faMoon}/></button>
+              </li>
+              <li className='nav-item'>
+                <a className='nav-link' href='#addAlbum'><FontAwesomeIcon icon={faPlusCircle}/></a>
+              </li>
+
+              {/* search button/dropdown functionality */}
+              <li className='nav-item dropdown'>
+                <button className='btn nav-link' id='searchDropdown' data-bs-toggle='dropdown' aria-expanded='false'>
+                  <FontAwesomeIcon icon={faSearch}/>
+                </button>
+                <ul className='dropdown-menu p-3' aria-labelledby='searchDropdown' style={{minWidth: '300px'}}>
+                  <li className='mb-2'>
+                    <input type='text' className='form-control' placeholder='Search by Album or Artist' value={keywords} onChange={(e) => setKeywords(e.target.value)}/>
+                  </li>
+                  <li className='mb-2'>
+                    <select className='form-select' value={genre} onChange={(e) => setGenre(e.target.value)}>
+                      <option value="">All Genres</option>
+                      {_(allAlbums).map(album => album.genre).sort().uniq().map(genre => (
+                        <option key={genre} value={genre}>
+                          {genre}
+                        </option>
+                      )).value()}
+                    </select>
+                  </li>
+                  <li>
+                    <button type='button' className='btn btn-primary w-100' onClick={searchAlbums}>Search</button>
+                  </li>
+                </ul>
+              </li>
+              
+              <li className='nav-item'>
+                <button className='btn nav-link' onClick={resetLibrary}>Reset Library</button>
+              </li>
+
+            </ul>
+          </div>
+        </div>
+      </nav>
+
+      {/* main section */}
       <h1 className='mt-4 text-center'>Welcome to Your Library!</h1>
       <div className='row mt-4'>
         {searchResults && searchResults.map((album) =>
-        (<div className='col-lg-2 mt-4' key={album.id}>
+        (<div className='col-lg-3 mt-4 d-flex align-items-stretch' key={album.id}>
           <Albums album={album} removeAlbum={removeAlbum} updatedAlbum={editAlbum}/>
         </div>)
         )}
@@ -193,26 +277,14 @@ function App() {
         <AddAlbum addAlbum={addAlbum} /> 
       </div>
 
-      {/* search functionality */}  
-      <div className='row mt-4'> 
-      <h1 className='mt-4  mb-4 text-center'>Search</h1>
-          <div className='col-lg-3 mb-4'>
-            <label htmlFor='txtKeywords'>Search by Album Title, or Artist Name</label>
-            <input type='text' className='form-control' placeholder='Search Here' onChange={evt => setKeywords(evt.currentTarget.value)} value={keywords}/>
-          </div>
-          <div className='col-lg-3 mb-4'>
-            <select value={genre} onChange={evt => setGenre(evt.currentTarget.value)} className='form-select'>
-              <option value="">Select Genre</option>
-              {_(allAlbums).map(album => album.genre).sort().uniq().map(genre => <option key={genre} value={genre}>{genre}</option>).value()}
-            </select>
-          </div>
-          <div className='col-lg-3 mb-4'>
-            <button type='button' className='btn btn-primary' onClick={searchAlbums}>Search <FontAwesomeIcon icon={faSearch}/></button>
-          </div>
+      {/* footer */}
+      <footer className='bg-dark text-light text-center py-3 mt-5'>
+        <div className='container'>
+          <p className='mb-0'>&copy; {new Date().getFullYear()} Matthew Macias</p>
         </div>
+      </footer>
     </div>
+  </div>
   );
 }
-
-
 export default App

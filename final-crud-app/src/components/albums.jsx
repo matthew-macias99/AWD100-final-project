@@ -25,15 +25,29 @@ function Albums(props){
     }
 
     return(
-        <div className='card'>
-            <img src={props.album.albumCover} alt='album cover' />
+        <div className='card h-100'>
+            <img src={props.album.albumCover} alt='album cover' className='card-img-top img-fluid' style={{height: '300px', objectFit: 'contain'}}/>
             {!editMode && <ul className='list-group list-group-flush'>
-                <li className='list-group-item'>{props.album.albumName}</li>
-                <li className='list-group-item'>By {props.album.artistName}</li>
-                <li className='list-group-item'>Genre: {props.album.genre}</li>
-                <li className='list-group-item'>Release Date: {props.album.releaseDate}</li>
-                <button type="button" className="btn btn-danger" onClick={() => props.removeAlbum(props.album)}>Remove Album <FontAwesomeIcon icon={faWarning}/> </button>
-                <button type='button' className='btn btn-warning' onClick={() => setEditMode(true)}>Edit <FontAwesomeIcon icon={faMagicWandSparkles}/></button>
+                <div className='card-text'>
+                    <li className='list-group-item'>{props.album.albumName}</li>
+                    <li className='list-group-item'>By {props.album.artistName}</li>
+                    <li className='list-group-item'>Genre: {props.album.genre}</li>
+                    <li className='list-group-item'>Release Date: {props.album.releaseDate}</li>
+                </div>
+                <div className='card-footer'>
+                    <div className="dropdown text-center m-2">
+                        <button className="btn btn-sm btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">Options</button>
+                        <ul className="dropdown-menu dropdown-menu-end">
+                            <li>
+                                <button className="dropdown-item" onClick={() => setEditMode(true)}>Edit <FontAwesomeIcon icon={faMagicWandSparkles}/></button>
+                            </li>
+                            <li>
+                                <button className="dropdown-item text-danger" onClick={() => props.removeAlbum(props.album)}>Remove Album <FontAwesomeIcon icon={faWarning}/></button>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
             </ul>
             }
             {editMode &&
