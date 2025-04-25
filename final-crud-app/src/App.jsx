@@ -1,13 +1,71 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { nanoid } from 'nanoid';
-import React, {useState} from 'react';
-import AddAlbum from './AddAlbum';
+import React, {useState, useEffect} from 'react';
+import AddAlbum from './components/AddAlbum';
+import _ from 'lodash';
+import Albums from './components/albums';
+import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
+import {faSearch} from '@fortawesome/free-solid-svg-icons';
 
 
 function App() {
 
 
   const [allAlbums, setAllAlbums] = useState(null);
+  const[searchResults, setSearchResults] = useState(null);
+  const[keywords, setKeywords] = useState("");
+  const[genre, setGenre] = useState("");
+
+  useEffect(() => {
+    saveAlbums(albums);
+  }, []);
+
+  const saveAlbums = (albums) => {
+    setAllAlbums(albums);
+    setSearchResults(albums);
+  }
+
+  const addAlbum = (newAlbum) => {
+    const updatedAlbums = [...allAlbums, newAlbum];
+    saveAlbums(updatedAlbums);
+  }
+
+  
+  const searchAlbums = () => {
+      let keywordsArray = [];
+
+      if(keywords){
+        keywordsArray = keywords.toLowerCase().split(' ');
+      }
+
+      if(genre){
+        keywordsArray.push(genre);
+      }
+
+      if(keywordsArray.length > 0){
+        const searchResults = allAlbums.filter(album => {
+          for(const word of keywordsArray){
+            if(album.albumName.toLowerCase().includes(word) || album.artistName.toLowerCase().includes(word) || album.genre === word){
+              return true;
+            }
+          }
+          return false;
+        });
+        setSearchResults(searchResults);
+      } else{
+        setSearchResults(allAlbums);
+      }
+  }
+
+  const removeAlbum = (albumToDelete) => {
+    const updatedAlbumsArray = allAlbums.filter(album => album.id !== albumToDelete.id);
+    saveAlbums(updatedAlbumsArray);
+  }
+
+  const editAlbum = (updatedAlbum) => {
+    const editedAlbumsArray = allAlbums.map(album => album.id === updatedAlbum.id ? {...album, ...updatedAlbum} : album);
+    saveAlbums(editedAlbumsArray);
+  }
 
 
   const albums = [{
@@ -118,34 +176,40 @@ function App() {
   }];
 
 
-  const addAlbum = (newAlbum) => {
-    const updatedAlbums = [...allAlbums, newAlbum];
-    setAllAlbums(updatedAlbums);
-  }
-
-
   return (
     <div className='container'>
       <h1 className='mt-4 text-center'>Welcome to Your Library!</h1>
       <div className='row mt-4'>
-        {allAlbums && allAlbums.map((album) =>
+        {searchResults && searchResults.map((album) =>
         (<div className='col-lg-2 mt-4' key={album.id}>
-          <div className='card'>
-            <img src={album.albumCover} alt='album cover' />
-            <ul className='list-group list-group-flush'>
-              <li className='list-group-item'>{album.albumName}</li>
-              <li className='list-group-item'>By {album.artistName}</li>
-              <li className='list-group-item'>Genre: {album.genre}</li>
-              <li className='list-group-item'>Release Date: {album.releaseDate}</li>
-            </ul>
-          </div>
+          <Albums album={album} removeAlbum={removeAlbum} updatedAlbum={editAlbum}/>
         </div>)
         )}
       </div>
-      {!allAlbums && <button type='button' className='btn btn-lg btn-success' onClick={() => setAllAlbums(albums)}>Save Albums</button>}
-      <div id='addAlbum' className='mt-4 mb-4'>
-        <AddAlbum addAlbum={addAlbum} />
+
+      {/* add album */}
+      <h1 className='mt-4 text-center'>Add an Album</h1>
+      <div id='addAlbum' className='mt-4 mb-4'> 
+        <AddAlbum addAlbum={addAlbum} /> 
       </div>
+
+      {/* search functionality */}  
+      <div className='row mt-4'> 
+      <h1 className='mt-4  mb-4 text-center'>Search</h1>
+          <div className='col-lg-3 mb-4'>
+            <label htmlFor='txtKeywords'>Search by Album Title, or Artist Name</label>
+            <input type='text' className='form-control' placeholder='Search Here' onChange={evt => setKeywords(evt.currentTarget.value)} value={keywords}/>
+          </div>
+          <div className='col-lg-3 mb-4'>
+            <select value={genre} onChange={evt => setGenre(evt.currentTarget.value)} className='form-select'>
+              <option value="">Select Genre</option>
+              {_(allAlbums).map(album => album.genre).sort().uniq().map(genre => <option key={genre} value={genre}>{genre}</option>).value()}
+            </select>
+          </div>
+          <div className='col-lg-3 mb-4'>
+            <button type='button' className='btn btn-primary' onClick={searchAlbums}>Search <FontAwesomeIcon icon={faSearch}/></button>
+          </div>
+        </div>
     </div>
   );
 }

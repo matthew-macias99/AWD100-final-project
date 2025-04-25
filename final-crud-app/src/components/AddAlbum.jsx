@@ -1,5 +1,8 @@
 import React, {useState} from 'react';
 import { nanoid } from 'nanoid';
+import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
+import {faPlusCircle} from '@fortawesome/free-solid-svg-icons';
+import './AddAlbum.css';
 
 function AddAlbum(props){
     // id, albumName, artistName, genre, releaseDate, albumCover
@@ -50,7 +53,7 @@ function AddAlbum(props){
                 <input type='file' name='file' id='fileUpload' onChange={imageUpdate}/>
             </div>
             <div className='col-lg-4 mt-4'>{/* submit button */}
-                <button type='button' id='btnAdd' className='btn btn-success btn-md' onClick={conjureAlbum}>Add Album </button>
+                <button type='button' id='btnAdd' className='btn btn-success btn-md' onClick={conjureAlbum}>Add Album <FontAwesomeIcon icon={faPlusCircle}/> </button>
             </div>
         </div>
     );
