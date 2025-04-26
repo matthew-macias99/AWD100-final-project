@@ -30,7 +30,17 @@ function App() {
     }
 
     if (storedDarkMode){
-      setDarkMode(JSON.parse(storedDarkMode));
+      try {
+        const parsedDarkMode = JSON.parse(storedDarkMode);
+        if (typeof parsedDarkMode === 'boolean'){
+          setDarkMode(parsedDarkMode);
+        } else{
+          setDarkMode(false);
+        }
+      } catch (error) {
+        console.error('Error parsing dark mode from localstorage:', error);
+        setDarkMode(false);
+      }
     }
   }, []);
 
